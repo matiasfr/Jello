@@ -70,10 +70,21 @@ void myinit()
                 if (ii == i && jj == j && kk == k){continue;}
 
                 //shear and structural
-                
-
-
-                // springs.push_back(s);
+                if(ii >= 0 && jj >= 0 && kk >= 0) {
+                  if(ii <=7 && jj <= 7 && kk <=7) {
+                    //sqrt 1/7
+                    int type = abs(i - ii) + abs(j - jj) + abs(k - kk);
+                    double len = 0;
+                    switch(type) {
+                      case 1: len = 1.0/7.0;
+                      case 2: len = sqrt(1.0/7.0);
+                      case 3: len = sqrt(3.0/7.0);
+                    }
+                    spring s(i,j,k, ii, jj, kk, len);
+                    springs.push_back(s);
+                  }
+                }
+                //
               }
             }
           }
