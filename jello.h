@@ -18,8 +18,31 @@
 #include <string.h>
 #include "openGL-headers.h"
 #include "pic.h"
+#include <vector>
 
-#define pi 3.141592653589793238462643383279 
+//define spring vector
+struct spring
+{
+  int start[3];
+  int end[3];
+  double length;
+
+  spring(int si,int sj,int sk,int ei,int ej,int ek, double len)
+  {
+    start[0] = si;
+    start[1] = sj;
+    start[2] = sk;
+    end[0] = ei;
+    end[1] = ej;
+    end[2] = ek;
+    length = len;
+  }
+
+};
+
+extern std::vector<spring> springs;
+
+#define pi 3.141592653589793238462643383279
 
 // camera angles
 extern double Theta;
@@ -33,7 +56,8 @@ extern int sprite;
 extern int g_vMousePos[2];
 extern int g_iLeftMouseButton,g_iMiddleMouseButton,g_iRightMouseButton;
 
-struct point 
+
+struct point
 {
    double x;
    double y;
@@ -99,7 +123,7 @@ extern struct world jello;
   (dest).x = (source).x;\
   (dest).y = (source).y;\
   (dest).z = (source).z;
-  
+
 // assigns values x,y,z to point vector dest
 // struct point dest
 // double x,y,z
@@ -135,4 +159,3 @@ extern struct world jello;
   (dest).z = (src).z * (scalar);
 
 #endif
-

@@ -12,6 +12,7 @@
 #include "showCube.h"
 #include "input.h"
 #include "physics.h"
+#include <vector>
 
 // camera parameters
 double Theta = pi / 6;
@@ -31,6 +32,8 @@ int shear=0, bend=0, structural=1, pause=0, viewingMode=0, saveScreenToFile=0;
 
 struct world jello;
 
+std::vector<spring> springs;
+
 int windowWidth, windowHeight;
 
 void myinit()
@@ -48,6 +51,39 @@ void myinit()
   glShadeModel(GL_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
   glEnable(GL_LINE_SMOOTH);
+
+  //group all spring data into struct
+  for (int i=0; i<=7; i++) {
+    for (int j=0; j<=7; j++) {
+      for (int k=0; k<=7; k++) {
+        //for interior point, 6 structural, 6 bend, 28 shear
+          //length is 1, or sqrt(2), or sqrt(3)
+          // spring s(i,j,k,i+1,j+1,k+1, 5.0);
+
+          // jello->p[i][j][k]
+          //iterate over neighboring points, excluding self
+          for(int ii=i-1; ii<=i+1; ii++) {
+            for (int jj=j-1; jj<=j+1; jj++) {
+              for (int kk =k-1; kk<=k+1; kk++) {
+
+                //skip if center
+                if (ii == i && jj == j && kk == k){continue;}
+
+                //shear and structural
+                
+
+
+                // springs.push_back(s);
+              }
+            }
+          }
+
+
+
+        }
+      }
+    }
+
 
   return;
 }
@@ -218,8 +254,10 @@ void doIdle()
   if (pause == 0)
   {
     // insert code which appropriately performs one step of the cube simulation:
-    //do one step
-    RK4(&jello);
+    // RK4(&jello);
+    Euler(&jello);
+
+
   }
 
   glutPostRedisplay();
