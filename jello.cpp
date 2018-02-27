@@ -57,10 +57,7 @@ void myinit()
     for (int j=0; j<=7; j++) {
       for (int k=0; k<=7; k++) {
         //for interior point, 6 structural, 6 bend, 28 shear
-          //length is 1, or sqrt(2), or sqrt(3)
-          // spring s(i,j,k,i+1,j+1,k+1, 5.0);
 
-          // jello->p[i][j][k]
           //iterate over neighboring points, excluding self
           for(int ii=i-1; ii<=i+1; ii++) {
             for (int jj=j-1; jj<=j+1; jj++) {
@@ -88,9 +85,33 @@ void myinit()
               }
             }
           }
+          //bend springs
+          double len  = 2/7;
 
-
-
+          if (i + 2 <=7) {
+            spring s(i,j,k, i+2, j, k, len);
+            springs.push_back(s);
+          }
+          if (j + 2 <=7) {
+            spring s(i,j,k, i, j+2, k, len);
+            springs.push_back(s);
+          }
+          if (k + 2 <=7) {
+            spring s(i,j,k, i, j, k+2, len);
+            springs.push_back(s);
+          }
+          if (i - 2 >= 0) {
+            spring s(i,j,k, i-2, j, k, len);
+            springs.push_back(s);
+          }
+          if (j - 2 >= 0) {
+            spring s(i,j,k, i, j-2, k, len);
+            springs.push_back(s);
+          }
+          if (k - 2 >= 0) {
+            spring s(i,j,k, i, j, k-2, len);
+            springs.push_back(s);
+          }
         }
       }
     }

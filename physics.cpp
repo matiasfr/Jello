@@ -17,20 +17,15 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
   //collision and non-collision k and damping constants
   double kE = jello->kElastic;
   double dE = jello->dElastic;
-
   double kC = jello->kCollision;
   double dC = jello->dCollision;
 
-  //computer hooke for one point
-  // printf("%f\n", ;
-  point p;
-  // pDIFFERENCE(jello->p[0][0][0],jello->p[0][0][1], p);
+
   
 
 
-
-
-
+  //acceleration for x
+  //double xA =  xForce / jello->mass;
 
 }
 
