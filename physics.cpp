@@ -20,13 +20,59 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
   double kC = jello->kCollision;
   double dC = jello->dCollision;
 
+  point forces[8][8][8];
 
-  
+  point springForce = {}; //total force on starting point from given spring
+
+//iterate through springs to calculate forces
+  for(int i=0; i<springs.size(); i++) {
+    //calculate hook force
+    pSUM(springForce, calculateHooke(kE, springs[i].length, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]), springForce);
+
+    //calculate damping force
+    pSUM(springForce, calculateDamping(dE, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]], jello->v[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->v[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]), springForce);
+
+    //add the accumulated forces to the point's force representation
+    pSUM(forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], springForce, forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]]);
+  }
 
 
-  //acceleration for x
-  //double xA =  xForce / jello->mass;
+//use forces to calculate acceleration for each point
+  for (int i=0; i<=7; i++) {
+    for (int j=0; j<=7; j++) {
+      for (int k=0; k<=7; k++) {
+        pMULTIPLY(forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], (1.0 / jello->mass), a[i][j][k]);
+      }
+    }
+  }
 
+
+}
+
+point calculateHooke(double k, double restLength, struct point a, struct point b) {
+  point temp = {};
+  temp.x = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.x - b.x) / distanceHelper(a,b));
+  temp.y = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.y - b.y) / distanceHelper(a,b));
+  temp.z = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.z - b.z) / distanceHelper(a,b));
+  return temp;
+}
+
+point calculateDamping(double k, struct point a, struct point b, struct point vA,struct point vB) {
+  point temp = {};
+  point velocityDiff = {};
+  pDIFFERENCE(vA, vB, velocityDiff);
+  double dampingCoefficient = ( velocityDiff.x * (a.x-b.x) + velocityDiff.y * (a.y-b.y) + velocityDiff.z * (a.z-b.z) ) / distanceHelper(a,b);
+
+  temp.x = k * (-1.0) * dampingCoefficient * (a.x-b.x) / distanceHelper(a,b);
+  temp.y = k * (-1.0) * dampingCoefficient * (a.y-b.y) / distanceHelper(a,b);
+  temp.z = k * (-1.0) * dampingCoefficient * (a.z-b.z) / distanceHelper(a,b);
+
+  return temp;
+}
+
+
+double distanceHelper(struct point a, struct point b) {
+  return sqrt( pow((a.x-b.x), 2) + pow((a.y-b.y), 2) + pow((a.z-b.z), 2) );
 }
 
 void initializePoint(point &a) {

@@ -73,9 +73,12 @@ void myinit()
                     int type = abs(i - ii) + abs(j - jj) + abs(k - kk);
                     double len = 0;
                     switch(type) {
-                      case 1: len = 1.0/7.0;
-                      case 2: len = sqrt(1.0/7.0);
-                      case 3: len = sqrt(3.0/7.0);
+                      // case 1: len = 1.0/7.0;
+                      // case 2: len = sqrt(1.0/7.0);
+                      // case 3: len = sqrt(3.0/7.0);
+                      case 1: len = (1.0/7.0);
+                      case 2: len = (1.0/7.0)*sqrt(2.0);
+                      case 3: len = (1.0/7.0)*sqrt(3.0);
                     }
                     spring s(i,j,k, ii, jj, kk, len);
                     springs.push_back(s);
@@ -86,7 +89,7 @@ void myinit()
             }
           }
           //bend springs
-          double len  = 2/7;
+          double len  = 2.0/7.0;
 
           if (i + 2 <=7) {
             spring s(i,j,k, i+2, j, k, len);

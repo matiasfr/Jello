@@ -15,5 +15,8 @@ void initializePoint(point &a);
 // updates the jello structure accordingly
 void Euler(struct world * jello);
 void RK4(struct world * jello);
+double distanceHelper(struct point a, struct point b);
+point calculateHooke(double k, double restLength, struct point a, struct point b);
+point calculateDamping(double k, struct point a, struct point b, struct point vA,struct point vB);
 
 #endif
