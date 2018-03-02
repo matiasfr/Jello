@@ -18,5 +18,5 @@ void RK4(struct world * jello);
 double distanceHelper(struct point a, struct point b);
 point calculateHooke(double k, double restLength, struct point a, struct point b);
 point calculateDamping(double k, struct point a, struct point b, struct point vA,struct point vB);
-
+void normalize(struct point & diff);
 #endif

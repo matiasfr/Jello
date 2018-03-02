@@ -7,7 +7,8 @@
 
 #include "jello.h"
 #include "physics.h"
-
+#include <iostream>
+int printCount = 0;
 /* Computes acceleration to every control point of the jello cube,
    which is in state given by 'jello'.
    Returns result in array 'a'. */
@@ -17,23 +18,30 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
   //collision and non-collision k and damping constants
   double kE = jello->kElastic;
   double dE = jello->dElastic;
+
   double kC = jello->kCollision;
   double dC = jello->dCollision;
 
-  point forces[8][8][8];
+  point forces[8][8][8] = {};
 
-  point springForce = {}; //total force on starting point from given spring
+
+
 
 //iterate through springs to calculate forces
+  int increment = 0;
   for(int i=0; i<springs.size(); i++) {
     //calculate hook force
-    pSUM(springForce, calculateHooke(kE, springs[i].length, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]), springForce);
 
-    //calculate damping force
-    pSUM(springForce, calculateDamping(dE, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]], jello->v[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->v[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]), springForce);
 
-    //add the accumulated forces to the point's force representation
-    pSUM(forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], springForce, forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]]);
+    point springForce = {}; //total force on starting point from given spring
+      springForce =  calculateHooke(kE, springs[i].length, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]);
+
+      //calculate damping force
+      pSUM(springForce, calculateDamping(dE, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]], jello->v[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->v[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]), springForce);
+
+      //add the accumulated forces to the point's force representation
+      pSUM(forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], springForce, forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]]);
+
   }
 
 
@@ -41,7 +49,7 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
   for (int i=0; i<=7; i++) {
     for (int j=0; j<=7; j++) {
       for (int k=0; k<=7; k++) {
-        pMULTIPLY(forces[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], (1.0 / jello->mass), a[i][j][k]);
+        pMULTIPLY(forces[i][j][k], (1.0 / jello->mass), a[i][j][k]);
       }
     }
   }
@@ -50,11 +58,24 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
 }
 
 point calculateHooke(double k, double restLength, struct point a, struct point b) {
+
   point temp = {};
-  temp.x = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.x - b.x) / distanceHelper(a,b));
-  temp.y = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.y - b.y) / distanceHelper(a,b));
-  temp.z = k * (-1.0) * (distanceHelper(a,b) - restLength) * ((a.z - b.z) / distanceHelper(a,b));
+  struct point diff;
+  double distance = (distanceHelper(a,b) - restLength);
+  pDIFFERENCE(a, b, diff);
+  normalize(diff);
+
+  pMULTIPLY(diff, k * -1 * distance, temp);
   return temp;
+}
+
+
+void normalize(struct point & diff) {
+  double length = sqrt((diff).x * (diff).x + (diff).y * (diff).y + (diff).z * (diff).z);
+  diff.x = diff.x/length;
+  diff.y = diff.y/length;
+  diff.z = diff.z/length;
+
 }
 
 point calculateDamping(double k, struct point a, struct point b, struct point vA,struct point vB) {
