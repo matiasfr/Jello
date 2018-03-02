@@ -19,8 +19,8 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
   double kE = jello->kElastic;
   double dE = jello->dElastic;
 
-  double kC = jello->kCollision;
-  double dC = jello->dCollision;
+  double kC = jello->kCollision * 1.0;
+  double dC = jello->dCollision * 1.0;
 
   point forces[8][8][8] = {};
 
@@ -44,11 +44,53 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
 
   }
 
-
 //use forces to calculate acceleration for each point
   for (int i=0; i<=7; i++) {
     for (int j=0; j<=7; j++) {
       for (int k=0; k<=7; k++) {
+
+        point cForce = {};
+        point normal = {};
+        //check boundaries for collision,
+        if(jello->p[i][j][k].x < -2.0) {
+          normal.x = 1, normal.y = 0, normal.z = 0;
+          cForce.x += kC * fabs(jello->p[i][j][k].x + 2.0) * normal.x;
+          cForce.x += dC * jello->v[i][j][k].x * -1.0;
+        }
+        if(jello->p[i][j][k].x > 2.0) {
+          normal.x = -1, normal.y = 0, normal.z = 0;
+          cForce.x += kC * fabs(jello->p[i][j][k].x - 2.0) * normal.x;
+          cForce.x += dC * jello->v[i][j][k].x * -1.0;
+        }
+        if(jello->p[i][j][k].y < -2.0) {
+          normal.x = 0, normal.y = 1, normal.z = 0;
+          cForce.y += kC * fabs(jello->p[i][j][k].y + 2.0) * normal.y;
+          cForce.y += dC * jello->v[i][j][k].y * -1.0;
+
+        }
+        if(jello->p[i][j][k].y > 2.0) {
+          normal.x = 0, normal.y = -1, normal.z = 0;
+          cForce.y += kC * fabs(jello->p[i][j][k].y - 2.0) * normal.y;
+          cForce.y += dC * jello->v[i][j][k].y * -1.0;
+        }
+        if(jello->p[i][j][k].z < -2.0) {
+          normal.x = 0, normal.y = 0, normal.z = 1;
+          cForce.z += kC * fabs(jello->p[i][j][k].z + 2.0) * normal.z;
+          cForce.z += dC * jello->v[i][j][k].z * -1.0;
+        }
+        if(jello->p[i][j][k].z > 2.0) {
+          normal.x = 0, normal.y = 0, normal.z = -1;
+          cForce.z += kC * fabs(jello->p[i][j][k].z - 2.0) * normal.z;
+          cForce.z += dC * jello->v[i][j][k].z * -1.0;
+        }
+
+        //sum collision forces to total forces
+        pSUM(forces[i][j][k], cForce,forces[i][j][k]);
+
+
+
+
+
         pMULTIPLY(forces[i][j][k], (1.0 / jello->mass), a[i][j][k]);
       }
     }
