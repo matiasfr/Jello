@@ -87,30 +87,33 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
 
           int x = 0, y = 0, z = 0;
           double grid = 4.0 / jello->resolution;
-          //check to make sure within boundaries before searching for force
-          if (jello->p[i][j][k].x <= -2.0) {
+          //check boundary cases to get correct force coord
+          //cast approximate location to int in order to index forcefield correctly
+          if (jello->p[i][j][k].x <= -2.0) { // out of bounds, set to 0
              x = 0;
            } else if (jello->p[i][j][k].x >= 2.0) {
-             x = (int) (4.0 / grid) - 1;
+             x = (int) (4.0 / grid) - 1.0;
            } else {
              x = (int) ((jello->p[i][j][k].x + 2.0) / grid);
           }
-
+          //process y
           if (jello->p[i][j][k].y <= -2.0) {
              y = 0;
            } else if (jello->p[i][j][k].y >= 2.0) {
-             y = (int) (4.0 / grid) - 1;
-          } else
+             y = (int) (4.0 / grid) - 1.0;
+          } else {
              y = (int) ((jello->p[i][j][k].y + 2.0) / grid);
-
+          }
+          //process z
           if (jello->p[i][j][k].z <= -2.0) {
              z = 0;
           } else if (jello->p[i][j][k].z >= 2.0) {
-             z = (int) (4.0 / grid) - 1;
+             z = (int) (4.0 / grid) - 1.0;
           } else {
              z = (int) ((jello->p[i][j][k].z + 2.0) / grid);
           }
-           int index = x * jello->resolution * jello->resolution + y * jello->resolution + z;
+          //get force index by multiplying resolution with voxel coordinate
+           int index = (x * jello->resolution) * (y + jello->resolution ) * (z + jello->resolution);
            pSUM(forces[i][j][k], jello->forceField[index], forces[i][j][k]);
 
         }
