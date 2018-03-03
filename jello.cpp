@@ -13,6 +13,8 @@
 #include "input.h"
 #include "physics.h"
 #include <vector>
+#include <iostream>
+#include <string>
 
 // camera parameters
 double Theta = pi / 6;
@@ -296,7 +298,14 @@ void doIdle()
   {
     // insert code which appropriately performs one step of the cube simulation:
     // RK4(&jello);
-    Euler(&jello);
+    // Euler(&jello);
+    if (std::string(jello.integrator) == "Euler") {
+      Euler(&jello);
+    } else if (std::string(jello.integrator) == "RK4"){
+      RK4(&jello);
+    } else {
+      std::cout<<"no integrator specified in world file"<<std::endl;
+    }
 
 
   }

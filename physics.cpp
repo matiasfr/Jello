@@ -24,16 +24,10 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
 
   point forces[8][8][8] = {};
 
-
-
-
 //iterate through springs to calculate forces
-  int increment = 0;
   for(int i=0; i<springs.size(); i++) {
     //calculate hook force
-
-
-    point springForce = {}; //total force on starting point from given spring
+      point springForce = {}; //total force on starting point from given spring
       springForce =  calculateHooke(kE, springs[i].length, jello->p[springs[i].start[0]][springs[i].start[1]][springs[i].start[2]], jello->p[springs[i].end[0]][springs[i].end[1]][springs[i].end[2]]);
 
       //calculate damping force
@@ -87,8 +81,39 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
         //sum collision forces to total forces
         pSUM(forces[i][j][k], cForce,forces[i][j][k]);
 
+        // calculate force field effect
+        //check whether resoltuion is 0, if so then do not calculate effect
+        if(jello->resolution != 0) {
 
+          int x = 0, y = 0, z = 0;
+          double grid = 4.0 / jello->resolution;
+          //check to make sure within boundaries before searching for force
+          if (jello->p[i][j][k].x <= -2.0) {
+             x = 0;
+           } else if (jello->p[i][j][k].x >= 2.0) {
+             x = (int) (4.0 / grid) - 1;
+           } else {
+             x = (int) ((jello->p[i][j][k].x + 2.0) / grid);
+          }
 
+          if (jello->p[i][j][k].y <= -2.0) {
+             y = 0;
+           } else if (jello->p[i][j][k].y >= 2.0) {
+             y = (int) (4.0 / grid) - 1;
+          } else
+             y = (int) ((jello->p[i][j][k].y + 2.0) / grid);
+
+          if (jello->p[i][j][k].z <= -2.0) {
+             z = 0;
+          } else if (jello->p[i][j][k].z >= 2.0) {
+             z = (int) (4.0 / grid) - 1;
+          } else {
+             z = (int) ((jello->p[i][j][k].z + 2.0) / grid);
+          }
+           int index = x * jello->resolution * jello->resolution + y * jello->resolution + z;
+           pSUM(forces[i][j][k], jello->forceField[index], forces[i][j][k]);
+
+        }
 
 
         pMULTIPLY(forces[i][j][k], (1.0 / jello->mass), a[i][j][k]);
