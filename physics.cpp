@@ -43,44 +43,6 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
     for (int j=0; j<=7; j++) {
       for (int k=0; k<=7; k++) {
 
-        point cForce = {};
-        point normal = {};
-        //check boundaries for collision,
-        if(jello->p[i][j][k].x < -2.0) {
-          normal.x = 1, normal.y = 0, normal.z = 0;
-          cForce.x += kC * fabs(jello->p[i][j][k].x + 2.0) * normal.x;
-          cForce.x += dC * jello->v[i][j][k].x * -1.0;
-        }
-        if(jello->p[i][j][k].x > 2.0) {
-          normal.x = -1, normal.y = 0, normal.z = 0;
-          cForce.x += kC * fabs(jello->p[i][j][k].x - 2.0) * normal.x;
-          cForce.x += dC * jello->v[i][j][k].x * -1.0;
-        }
-        if(jello->p[i][j][k].y < -2.0) {
-          normal.x = 0, normal.y = 1, normal.z = 0;
-          cForce.y += kC * fabs(jello->p[i][j][k].y + 2.0) * normal.y;
-          cForce.y += dC * jello->v[i][j][k].y * -1.0;
-
-        }
-        if(jello->p[i][j][k].y > 2.0) {
-          normal.x = 0, normal.y = -1, normal.z = 0;
-          cForce.y += kC * fabs(jello->p[i][j][k].y - 2.0) * normal.y;
-          cForce.y += dC * jello->v[i][j][k].y * -1.0;
-        }
-        if(jello->p[i][j][k].z < -2.0) {
-          normal.x = 0, normal.y = 0, normal.z = 1;
-          cForce.z += kC * fabs(jello->p[i][j][k].z + 2.0) * normal.z;
-          cForce.z += dC * jello->v[i][j][k].z * -1.0;
-        }
-        if(jello->p[i][j][k].z > 2.0) {
-          normal.x = 0, normal.y = 0, normal.z = -1;
-          cForce.z += kC * fabs(jello->p[i][j][k].z - 2.0) * normal.z;
-          cForce.z += dC * jello->v[i][j][k].z * -1.0;
-        }
-
-        //sum collision forces to total forces
-        pSUM(forces[i][j][k], cForce,forces[i][j][k]);
-
         // calculate force field effect
         //check whether resoltuion is 0, if so then do not calculate effect
         if(jello->resolution != 0) {
@@ -89,7 +51,7 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
           double grid = 4.0 / jello->resolution;
           //check boundary cases to get correct force coord
           //cast approximate location to int in order to index forcefield correctly
-          if (jello->p[i][j][k].x <= -2.0) { // out of bounds, set to 0
+          if (jello->p[i][j][k].x <= -2.0) { // out of bounds, set x to 0
              x = 0;
            } else if (jello->p[i][j][k].x >= 2.0) {
              x = (int) (4.0 / grid) - 1.0;
@@ -112,12 +74,54 @@ void computeAcceleration(struct world * jello, struct point a[8][8][8])
           } else {
              z = (int) ((jello->p[i][j][k].z + 2.0) / grid);
           }
-          //get force index by multiplying resolution with voxel coordinate
-           int index = (x * jello->resolution) * (y + jello->resolution ) * (z + jello->resolution);
+          //x*res^2 + y*res + z to index forcefield
+           int index = (x * jello->resolution * jello->resolution) + (y * jello->resolution) + (z);
            pSUM(forces[i][j][k], jello->forceField[index], forces[i][j][k]);
 
         }
 
+        //check boundaries for collision and implement penalty springs
+        point cForce = {}; //collision force
+        point cNormal = {}; //normal vector of collision point
+
+        if(jello->p[i][j][k].x < -2.0) {
+          cNormal.x = 1, cNormal.y = 0, cNormal.z = 0;
+          cForce.x += kC * fabs(jello->p[i][j][k].x + 2.0) * cNormal.x;
+          cForce.x += dC * jello->v[i][j][k].x * -1.0;
+        }
+        if(jello->p[i][j][k].x > 2.0) {
+          cNormal.x = -1, cNormal.y = 0, cNormal.z = 0;
+          cForce.x += kC * fabs(jello->p[i][j][k].x - 2.0) * cNormal.x;
+          cForce.x += dC * jello->v[i][j][k].x * -1.0;
+        }
+
+        if(jello->p[i][j][k].y < -2.0) {
+          //calculate normal based on boundary wall
+          cNormal.x = 0, cNormal.y = 1, cNormal.z = 0;
+          //artifical spring
+          cForce.y += kC * fabs(jello->p[i][j][k].y + 2.0) * cNormal.y;
+          //damping
+          cForce.y += dC * jello->v[i][j][k].y * -1.0;
+        }
+        if(jello->p[i][j][k].y > 2.0) {
+          cNormal.x = 0, cNormal.y = -1, cNormal.z = 0;
+          cForce.y += kC * fabs(jello->p[i][j][k].y - 2.0) * cNormal.y;
+          cForce.y += dC * jello->v[i][j][k].y * -1.0;
+        }
+
+        if(jello->p[i][j][k].z < -2.0) {
+          cNormal.x = 0, cNormal.y = 0, cNormal.z = 1;
+          cForce.z += kC * fabs(jello->p[i][j][k].z + 2.0) * cNormal.z;
+          cForce.z += dC * jello->v[i][j][k].z * -1.0;
+        }
+        if(jello->p[i][j][k].z > 2.0) {
+          cNormal.x = 0, cNormal.y = 0, cNormal.z = -1;
+          cForce.z += kC * fabs(jello->p[i][j][k].z - 2.0) * cNormal.z;
+          cForce.z += dC * jello->v[i][j][k].z * -1.0;
+        }
+
+        //sum collision forces to total forces
+        pSUM(forces[i][j][k], cForce,forces[i][j][k]);
 
         pMULTIPLY(forces[i][j][k], (1.0 / jello->mass), a[i][j][k]);
       }
@@ -134,7 +138,6 @@ point calculateHooke(double k, double restLength, struct point a, struct point b
   double distance = (distanceHelper(a,b) - restLength);
   pDIFFERENCE(a, b, diff);
   normalize(diff);
-
   pMULTIPLY(diff, k * -1 * distance, temp);
   return temp;
 }
